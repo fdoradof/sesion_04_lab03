@@ -1,0 +1,79 @@
+---
+- name: "Laboratorio de Facts"
+  hosts: 192.168.0.19 
+  tasks:
+    - name: "Lista de variables facts del servidor"
+      debug:
+        var: ansible_facts
+
+    - name: "Creacion de archivo"
+      file:
+        path: "/tmp/datos_{{ ansible_facts['hostname'] }}.txt"
+        state: touch
+
+    - name: "Introduccion de datos del dispositivo de red"
+      blockinfile:
+        path: "/tmp/datos_{{ ansible_facts['hostname'] }}.txt"
+        marker_begin: "Los dato datos de red del {{ ansible_facts['hostname'] }} son:"
+        block: |
+          "IP = {{ ansible_facts['default_ipv4']['address'] }}
+          MAC  = {{ ansible_facts['default_ipv4']['macaddress'] }}
+          GATEWAY  = {{ ansible_facts['default_ipv4']['gateway'] }}
+          NETMASK = {{ ansible_facts['default_ipv4']['netmask'] }}"
+    
+    - name: "Particionado del nuevo disco"
+      parted:
+        device: /dev/sdb
+        number: 1
+        flags: [ lvm ]
+
+        state: present
+
+    - name: "Creacion del VG"
+      lvg:
+        vg: vg_prueba
+        pvs: /dev/sdb1
+        pesize: "2000M"
+
+
+    - name: "Creacion del nuevo LV"
+      lvol:
+        vg: vg_prueba
+        lv: lv_prueba
+        size: "100%VG"
+        resizefs: true
+        force: yes
+        state: present
+
+    - name: "Configuracion del filesystem"
+      filesystem:
+        fstype: xfs
+        dev: /dev/mapper/vg_prueba-lv_prueba
+
+    - name: "Creacion ruta de montaje"
+      file:
+        path: /mnt/prueba
+        mode: 0765
+        recurse: yes
+        state: directory
+
+    - name: "Montar el disco en el directorio"
+      mount:
+        path: /mnt/prueba
+        src: /dev/mapper/vg_prueba-lv_prueba
+        fstype: xfs
+        state: present
+
+    - name: "Introduccion de datos de los dispositivos de almacenamiento"
+      blockinfile:
+        path: "/tmp/datos_{{ ansible_facts['hostname'] }}.txt"
+        marker_begin: "Los datos de almacenamiento del  {{ ansible_facts['hostname'] }} son:"
+        block: |
+          "Nombre del dispositivo = {{ item.device }}
+          Punto de montaje = {{ item.mount }}
+          Tipo de fs = {{ item.fstype }}
+          Espacio total = {{ item.size_total }}
+          Tamaño disponible = {{ item.size_available }}"
+        marker_end: "#####################################################"
+      loop: "{{ ansible_mounts }}"
+
