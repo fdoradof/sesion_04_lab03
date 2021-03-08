@@ -1,6 +1,6 @@
 ---
 - name: "Laboratorio de Facts"
-  hosts: 192.168.0.19 
+  hosts: nodo_01
   tasks:
     - name: "Lista de variables facts del servidor"
       debug:
