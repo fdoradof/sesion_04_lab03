@@ -11,15 +11,22 @@
         path: "/tmp/datos_{{ ansible_facts['hostname'] }}.txt"
         state: touch
 
-    - name: "Introduccion de datos del dispositivo de red"
+    - name: "Introduccion de datos del dispositivo de red por defecto"
       blockinfile:
         path: "/tmp/datos_{{ ansible_facts['hostname'] }}.txt"
         marker_begin: "Los dato datos de red del {{ ansible_facts['hostname'] }} son:"
         block: |
-          "IP = {{ ansible_facts['default_ipv4']['address'] }}
+          IP = {{ ansible_facts['default_ipv4']['address'] }}
           MAC  = {{ ansible_facts['default_ipv4']['macaddress'] }}
           GATEWAY  = {{ ansible_facts['default_ipv4']['gateway'] }}
-          NETMASK = {{ ansible_facts['default_ipv4']['netmask'] }}"
+          NETMASK = {{ ansible_facts['default_ipv4']['netmask'] }}
+    
+    - name: "Introduccion de datos del otros dispositivos de red"
+      blockinfile:
+        path: "/tmp/datos_{{ ansible_facts['hostname'] }}.txt"
+        block: |
+          IP: {{ ansible_facts["lo"]["ipv4"]["address"] }}
+          Netmask: {{ ansible_facts["lo"]["ipv4"]["netmask"] }}
     
     - name: "Particionado del nuevo disco"
       parted:
