@@ -33,7 +33,6 @@
         device: /dev/sdb
         number: 1
         flags: [ lvm ]
-
         state: present
 
     - name: "Creacion del VG"
