@@ -30,4 +30,3 @@ Laboratorio de facts
 		- Montarlo en /mnt/prueba
 	
 	- Actualizaremos la lista de facts con los nuevos datos del nuevo disco
-![image](https://user-images.githubusercontent.com/73586925/110911749-5e05fc80-8313-11eb-89fe-7226bd246b25.png)
